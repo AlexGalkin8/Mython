@@ -6,16 +6,19 @@
 
 using namespace std;
 
-namespace parse {
+namespace parse
+{
 
-unique_ptr<ast::Statement> ParseProgramFromString(const string& program) {
-    istringstream is(program);
-    parse::Lexer lexer(is);
-    return ParseProgram(lexer);
-}
+    unique_ptr<ast::Statement> ParseProgramFromString(const string& program)
+    {
+        istringstream is(program);
+        parse::Lexer lexer(is);
+        return ParseProgram(lexer);
+    }
 
-void TestSimpleProgram() {
-    const string program = R"(
+    void TestSimpleProgram()
+    {
+        const string program = R"(
 x = 4
 y = 5
 z = "hello, "
@@ -23,17 +26,18 @@ n = "world"
 print x + y, z + n
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "9 hello, world\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "9 hello, world\n"s);
+    }
 
-void TestProgramWithClasses() {
-    const string program = R"(
+    void TestProgramWithClasses()
+    {
+        const string program = R"(
 program_name = "Classes test"
 
 class Empty:
@@ -62,17 +66,18 @@ print program_name, origin, far_far_away, origin.SetX(1)
 )"s;
 
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    //ASSERT_EQUAL(context.output.str(), "Success\nSuccess\n"s);
-}
+        //ASSERT_EQUAL(context.output.str(), "Success\nSuccess\n"s);
+    }
 
-void TestProgramWithIf() {
-    const string program = R"(
+    void TestProgramWithIf()
+    {
+        const string program = R"(
 x = 4
 y = 5
 if x > y:
@@ -88,17 +93,18 @@ else:
   print 'x <= 0'
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "x <= y\ny >= 0\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "x <= y\ny >= 0\n"s);
+    }
 
-void TestReturnFromIf() {
-    const string program = R"(
+    void TestReturnFromIf()
+    {
+        const string program = R"(
 class Abs:
   def calc(n):
     if n > 0:
@@ -110,17 +116,18 @@ x = Abs()
 print x.calc(2)
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "2\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "2\n"s);
+    }
 
-void TestRecursion() {
-    const string program = R"(
+    void TestRecursion()
+    {
+        const string program = R"(
 class ArithmeticProgression:
   def calc(n):
     self.result = 0
@@ -137,17 +144,18 @@ x.calc(10)
 print x.result
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "55\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "55\n"s);
+    }
 
-void TestRecursion2() {
-    const string program = R"(
+    void TestRecursion2()
+    {
+        const string program = R"(
 class GCD:
   def __init__():
     self.call_count = 0
@@ -166,17 +174,18 @@ print x.calc(22, 17)
 print x.call_count
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "17\n1\n115\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "17\n1\n115\n"s);
+    }
 
-void TestComplexLogicalExpression() {
-    const string program = R"(
+    void TestComplexLogicalExpression()
+    {
+        const string program = R"(
 a = 1
 b = 2
 c = 3
@@ -184,17 +193,18 @@ ok = a + b > c and a + c > b and b + c > a
 print ok
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(), "False\n"s);
-}
+        ASSERT_EQUAL(context.output.str(), "False\n"s);
+    }
 
-void TestClassicalPolymorphism() {
-    const string program = R"(
+    void TestClassicalPolymorphism()
+    {
+        const string program = R"(
 class Shape:
   def __str__():
     return "Shape"
@@ -236,19 +246,20 @@ t2 = Triangle(125, 1, 2)
 print r, c, t1, t2
 )"s;
 
-    runtime::DummyContext context;
+        runtime::DummyContext context;
 
-    runtime::Closure closure;
-    auto tree = ParseProgramFromString(program);
-    tree->Execute(closure, context);
+        runtime::Closure closure;
+        auto tree = ParseProgramFromString(program);
+        tree->Execute(closure, context);
 
-    ASSERT_EQUAL(context.output.str(),
-                 "Rect(10x20) Circle(52) Triangle(3, 4, 5) Wrong triangle\n"s);
-}
+        ASSERT_EQUAL(context.output.str(),
+            "Rect(10x20) Circle(52) Triangle(3, 4, 5) Wrong triangle\n"s);
+    }
 
 }  // namespace parse
 
-void TestParseProgram(TestRunner& tr) {
+void TestParseProgram(TestRunner& tr)
+{
     RUN_TEST(tr, parse::TestSimpleProgram);
     RUN_TEST(tr, parse::TestProgramWithClasses);
     RUN_TEST(tr, parse::TestProgramWithIf);

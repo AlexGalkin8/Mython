@@ -3,6 +3,8 @@
 #include <memory>
 #include <stdexcept>
 
+// Реализация синтаксическкого анализатора (парсера) языка Mython.
+
 namespace parse
 {
     class Lexer;

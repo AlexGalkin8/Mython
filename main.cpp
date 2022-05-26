@@ -145,9 +145,9 @@ int main()
         TestAll();
         RunMythonProgram(cin, cout);
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        cerr << e.what() << endl;
         return 1;
     }
     return 0;

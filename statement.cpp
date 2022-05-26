@@ -23,14 +23,14 @@ namespace ast
 
     /***************   VariableValue   ***************/
 
-    VariableValue::VariableValue(const std::string& var_name)
+    VariableValue::VariableValue(const string& var_name)
         : name_(var_name)
     {
     }
 
 
-    VariableValue::VariableValue(std::vector<std::string> dotted_ids)
-        : dotted_ids_(std::move(dotted_ids))
+    VariableValue::VariableValue(vector<string> dotted_ids)
+        : dotted_ids_(move(dotted_ids))
     {
     }
 
@@ -62,7 +62,7 @@ namespace ast
         }
         else
         {
-            throw std::runtime_error("VariableValue::Execute: There is no value with the given name"s);
+            throw runtime_error("VariableValue::Execute: There is no value with the given name"s);
         }
     }
 
@@ -70,8 +70,8 @@ namespace ast
 
     /***************   Assignment   ***************/
 
-    Assignment::Assignment(std::string var, std::unique_ptr<Statement> rv)
-        : name_(std::move(var)), rv_(std::move(rv))
+    Assignment::Assignment(string var, unique_ptr<Statement> rv)
+        : name_(move(var)), rv_(move(rv))
     {
     }
 
@@ -79,7 +79,7 @@ namespace ast
     ObjectHolder Assignment::Execute(Closure& closure, Context& context)
     {
         if (!rv_)
-            throw std::runtime_error("Print::Execute: Null pointer");
+            throw runtime_error("Print::Execute: Null pointer");
 
         closure[name_] = rv_->Execute(closure, context); // Присвиваем имя переменной. Если данной переменной нет в closure, то создаём
         return closure.at(name_);
@@ -91,29 +91,29 @@ namespace ast
 
     Print::Print(unique_ptr<Statement> argument)
     {
-        args_.push_back(std::move(argument));
+        args_.push_back(move(argument));
     }
 
 
     Print::Print(vector<unique_ptr<Statement>> args)
-        : args_(std::move(args))
+        : args_(move(args))
     {
     }
 
 
-    unique_ptr<Print> Print::Variable(const std::string& name)
+    unique_ptr<Print> Print::Variable(const string& name)
     {
-        return std::make_unique<Print>(std::move(std::make_unique<VariableValue>(name)));
+        return make_unique<Print>(move(make_unique<VariableValue>(name)));
     }
 
 
     ObjectHolder Print::Execute(Closure& closure, Context& context)
     {
         bool b = false;
-        for (std::unique_ptr<Statement>& arg : args_)
+        for (unique_ptr<Statement>& arg : args_)
         {
             if (!arg)
-                throw std::runtime_error("Print::Execute: Null pointer");
+                throw runtime_error("Print::Execute: Null pointer");
 
             if (b)
                 context.GetOutputStream() << " "s;
@@ -127,7 +127,7 @@ namespace ast
             b = true;
         }
 
-        context.GetOutputStream() << std::endl;
+        context.GetOutputStream() << endl;
 
         return {};
     }
@@ -136,11 +136,11 @@ namespace ast
 
     /***************   MethodCall   ***************/
 
-    MethodCall::MethodCall(std::unique_ptr<Statement> object, std::string method,
-        std::vector<std::unique_ptr<Statement>> args)
-        : object_(std::move(object))
-        , method_name_(std::move(method))
-        , method_args_(std::move(args))
+    MethodCall::MethodCall(unique_ptr<Statement> object, string method,
+        vector<unique_ptr<Statement>> args)
+        : object_(move(object))
+        , method_name_(move(method))
+        , method_args_(move(args))
     {
     }
 
@@ -148,20 +148,20 @@ namespace ast
     ObjectHolder MethodCall::Execute(Closure& closure, Context& context)
     {
         if (!object_)
-            throw std::runtime_error("MethodCall::Execute: Null pointer");
+            throw runtime_error("MethodCall::Execute: Null pointer");
 
         // Запрашиваем интерфейс класса, который передан в переменной-объекте
         runtime::ClassInstance* cls_instance =
             dynamic_cast<runtime::ClassInstance*>(object_->Execute(closure, context).Get());
 
         // Создаём массив аргументов-обьектов
-        std::vector<runtime::ObjectHolder> method_args;
+        vector<runtime::ObjectHolder> method_args;
 
         // Получаем обьекты из переданных Statement'ов
         for (auto& arg : method_args_)
         {
             if (!arg)
-                throw std::runtime_error("MethodCall::Execute: Null pointer");
+                throw runtime_error("MethodCall::Execute: Null pointer");
             method_args.push_back(arg->Execute(closure, context));
         }
         // Вызываем метод
@@ -175,9 +175,9 @@ namespace ast
     ObjectHolder Stringify::Execute(Closure& closure, Context& context)
     {
         if (!argument_)
-            throw std::runtime_error("Stringify::Execute: Null pointer");
+            throw runtime_error("Stringify::Execute: Null pointer");
 
-        std::stringstream out;
+        stringstream out;
         // Получаем обьект из Statement'а
         auto arg = argument_->Execute(closure, context);
 
@@ -196,7 +196,7 @@ namespace ast
     ObjectHolder Add::Execute(Closure& closure, Context& context)
     {
         if (!lhs_ || !rhs_)
-            throw std::runtime_error("Add::Execute: Null pointer");
+            throw runtime_error("Add::Execute: Null pointer");
 
         ObjectHolder lhs = lhs_->Execute(closure, context);
         ObjectHolder rhs = rhs_->Execute(closure, context);
@@ -218,7 +218,7 @@ namespace ast
         }
         else
         {
-            throw std::runtime_error("Add: Error when adding two values."s);
+            throw runtime_error("Add: Error when adding two values."s);
         }
     }
 
@@ -229,7 +229,7 @@ namespace ast
     ObjectHolder Sub::Execute(Closure& closure, Context& context)
     {
         if (!lhs_ || !rhs_)
-            throw std::runtime_error("Sub::Execute: Null pointer");
+            throw runtime_error("Sub::Execute: Null pointer");
 
         ObjectHolder lhs = lhs_->Execute(closure, context);
         ObjectHolder rhs = rhs_->Execute(closure, context);
@@ -241,7 +241,7 @@ namespace ast
         }
         else
         {
-            throw std::runtime_error("Sub: Error when subtracting two values."s);
+            throw runtime_error("Sub: Error when subtracting two values."s);
         }
     }
 
@@ -252,7 +252,7 @@ namespace ast
     ObjectHolder Mult::Execute(Closure& closure, Context& context)
     {
         if (!lhs_ || !rhs_)
-            throw std::runtime_error("Mult::Execute: Null pointer");
+            throw runtime_error("Mult::Execute: Null pointer");
 
         ObjectHolder lhs = lhs_->Execute(closure, context);
         ObjectHolder rhs = rhs_->Execute(closure, context);
@@ -264,7 +264,7 @@ namespace ast
         }
         else
         {
-            throw std::runtime_error("Mult: Error while multiplying two numbers."s);
+            throw runtime_error("Mult: Error while multiplying two numbers."s);
         }
     }
 
@@ -275,7 +275,7 @@ namespace ast
     ObjectHolder Div::Execute(Closure& closure, Context& context)
     {
         if (!lhs_ || !rhs_)
-            throw std::runtime_error("Div::Execute: Null pointer");
+            throw runtime_error("Div::Execute: Null pointer");
 
         ObjectHolder lhs = lhs_->Execute(closure, context);
         ObjectHolder rhs = rhs_->Execute(closure, context);
@@ -288,7 +288,7 @@ namespace ast
         }
         else
         {
-            throw std::runtime_error("Div: Error when dividing two values."s);
+            throw runtime_error("Div: Error when dividing two values."s);
         }
     }
 
@@ -301,7 +301,7 @@ namespace ast
         for (unique_ptr<Statement>& instruction : instructions_)
         {
             if (!instruction)
-                throw std::runtime_error("Compound::Execute: Null pointer");
+                throw runtime_error("Compound::Execute: Null pointer");
             instruction->Execute(closure, context);
         }
         return {};
@@ -323,7 +323,7 @@ namespace ast
     /***************   ClassDefinition   ***************/
 
     ClassDefinition::ClassDefinition(ObjectHolder cls)
-        : class_(std::move(cls))
+        : class_(move(cls))
     {
     }
 
@@ -337,11 +337,11 @@ namespace ast
 
     /***************   FieldAssignment   ***************/
 
-    FieldAssignment::FieldAssignment(VariableValue object, std::string field_name,
-        std::unique_ptr<Statement> rv)
-        : object_(std::move(object))
-        , field_name_(std::move(field_name))
-        , rv_(std::move(rv))
+    FieldAssignment::FieldAssignment(VariableValue object, string field_name,
+        unique_ptr<Statement> rv)
+        : object_(move(object))
+        , field_name_(move(field_name))
+        , rv_(move(rv))
     {
     }
 
@@ -349,7 +349,7 @@ namespace ast
     ObjectHolder FieldAssignment::Execute(Closure& closure, Context& context)
     {
         if (!rv_)
-            throw std::runtime_error("FieldAssignment::Execute: Null pointer");
+            throw runtime_error("FieldAssignment::Execute: Null pointer");
         runtime::ClassInstance* obj = dynamic_cast<runtime::ClassInstance*>(object_.Execute(closure, context).Get());
         obj->Fields()[field_name_] = rv_->Execute(closure, context);
         return obj->Fields().at(field_name_);
@@ -359,11 +359,11 @@ namespace ast
 
     /***************   IfElse   ***************/
 
-    IfElse::IfElse(std::unique_ptr<Statement> condition, std::unique_ptr<Statement> if_body,
-        std::unique_ptr<Statement> else_body)
-        : condition_(std::move(condition))
-        , if_body_(std::move(if_body))
-        , else_body_(std::move(else_body))
+    IfElse::IfElse(unique_ptr<Statement> condition, unique_ptr<Statement> if_body,
+        unique_ptr<Statement> else_body)
+        : condition_(move(condition))
+        , if_body_(move(if_body))
+        , else_body_(move(else_body))
     {
     }
 
@@ -371,7 +371,7 @@ namespace ast
     ObjectHolder IfElse::Execute(Closure& closure, Context& context)
     {
         if (!condition_)
-            throw std::runtime_error("IfElse::Execute: Null pointer");
+            throw runtime_error("IfElse::Execute: Null pointer");
         ObjectHolder condition = condition_->Execute(closure, context);
 
         if (IsTrue(condition))
@@ -395,14 +395,14 @@ namespace ast
     ObjectHolder Or::Execute(Closure& closure, Context& context)
     {
         if (!lhs_)
-            throw std::runtime_error("Or::Execute: Null pointer");
+            throw runtime_error("Or::Execute: Null pointer");
         ObjectHolder lhs = lhs_->Execute(closure, context);
 
         if (IsTrue(lhs))
             return ObjectHolder::Own(runtime::Bool(true));
 
         if (!rhs_)
-            throw std::runtime_error("Or::Execute: Null pointer");
+            throw runtime_error("Or::Execute: Null pointer");
         ObjectHolder rhs = rhs_->Execute(closure, context);
 
         if (IsTrue(rhs))
@@ -436,7 +436,7 @@ namespace ast
     ObjectHolder Not::Execute(Closure& closure, Context& context)
     {
         if (!argument_)
-            throw std::runtime_error("Not::Execute: Null pointer");
+            throw runtime_error("Not::Execute: Null pointer");
 
         ObjectHolder arg = argument_->Execute(closure, context);
         if (IsTrue(arg))
@@ -450,7 +450,7 @@ namespace ast
     /***************   Comparison   ***************/
 
     Comparison::Comparison(Comparator cmp, unique_ptr<Statement> lhs, unique_ptr<Statement> rhs)
-        : BinaryOperation(std::move(lhs), std::move(rhs)), comparator_(cmp)
+        : BinaryOperation(move(lhs), move(rhs)), comparator_(cmp)
     {
     }
 
@@ -458,7 +458,7 @@ namespace ast
     ObjectHolder Comparison::Execute(Closure& closure, Context& context)
     {
         if (!lhs_ || !rhs_)
-            throw std::runtime_error("Comparison::Execute: Null pointer");
+            throw runtime_error("Comparison::Execute: Null pointer");
 
         ObjectHolder lhs = lhs_->Execute(closure, context);
         ObjectHolder rhs = rhs_->Execute(closure, context);
@@ -479,8 +479,8 @@ namespace ast
     }
 
 
-    NewInstance::NewInstance(const runtime::Class& cls, std::vector<std::unique_ptr<Statement>> args)
-        : cls_(cls), args_(std::move(args))
+    NewInstance::NewInstance(const runtime::Class& cls, vector<unique_ptr<Statement>> args)
+        : cls_(cls), args_(move(args))
     {
     }
 
@@ -492,7 +492,7 @@ namespace ast
 
         if (cls_inst->HasMethod(INIT_METHOD, args_.size()))
         {
-            std::vector<runtime::ObjectHolder> actual_args;
+            vector<runtime::ObjectHolder> actual_args;
             for (const auto& arg : args_)
             {
                 actual_args.push_back(arg->Execute(closure, context));
@@ -506,8 +506,8 @@ namespace ast
 
     /***************   MethodBody   ***************/
 
-    MethodBody::MethodBody(std::unique_ptr<Statement>&& body)
-        : body_(std::move(body))
+    MethodBody::MethodBody(unique_ptr<Statement>&& body)
+        : body_(move(body))
     {
     }
 
@@ -517,7 +517,7 @@ namespace ast
         try
         {
             if (!body_)
-                throw  std::runtime_error("MethodBody::Execute: Null pointer");
+                throw  runtime_error("MethodBody::Execute: Null pointer");
 
             return body_->Execute(closure, context);
         }

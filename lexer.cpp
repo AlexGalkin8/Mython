@@ -1,16 +1,14 @@
-#include "lexer.h"
-
 #include <algorithm>
 #include <charconv>
 #include <cctype>
+
+#include "lexer.h"
 
 using namespace std;
 
 namespace parse
 {
-    /*****************************************************
-    ******************   Class Token   *******************
-    ******************************************************/
+    /******************   Class Token   *******************/
 
     bool operator==(const Token& lhs, const Token& rhs)
     {
@@ -46,7 +44,7 @@ namespace parse
     }
 
 
-    std::ostream& operator<<(std::ostream& os, const Token& rhs)
+    ostream& operator<<(ostream& os, const Token& rhs)
     {
         using namespace token_type;
 
@@ -91,19 +89,17 @@ namespace parse
 
 
 
-    /*****************************************************
-    *******************   Supp Func   ********************
-    ******************************************************/
+    /*******************   Supp Func   ********************/
 
-    std::string LoadLiteral(std::istream& input)
+    string LoadLiteral(istream& input)
     {
-        std::string s;
+        string s;
 
         // Слова должны начинаться с буквы или подчёркивания
-        if (NAME_SYMBOLS.find(input.peek()) != std::string::npos)
+        if (NAME_SYMBOLS.find(input.peek()) != string::npos)
         {
             // Слова могут содержать символы, подчёркивания и цифры
-            while (NAME_SYMBOLS.find(input.peek()) != std::string::npos ||
+            while (NAME_SYMBOLS.find(input.peek()) != string::npos ||
                    NUMBER_SYMBOLS.count(input.peek()))
             {
                 s.push_back(static_cast<char>(input.get()));
@@ -115,11 +111,9 @@ namespace parse
 
 
 
-    /*****************************************************
-    ******************   Class Lexer   *******************
-    ******************************************************/
+    /******************   Class Lexer   *******************/
 
-    Lexer::Lexer(std::istream& input)
+    Lexer::Lexer(istream& input)
         : token_stream_(input)
         , current_token_()
         , num_indents_(0)
@@ -137,7 +131,7 @@ namespace parse
 
     Token Lexer::NextToken()
     {
-        std::optional<Token> out_token(std::nullopt);
+        optional<Token> out_token(nullopt);
 
         // События перед чтением
         //BeforeRead();
@@ -166,13 +160,11 @@ namespace parse
 
 
 
-    /*****************************************************
-    ************    Class Lexer: Read Func   *************
-    ******************************************************/
+    /************    Class Lexer: Read Func   *************/
 
-    std::optional<Token> Lexer::ReadToken()
+    optional<Token> Lexer::ReadToken()
     {
-        std::optional<Token> out_token(std::nullopt);
+        optional<Token> out_token(nullopt);
 
         if (!token_stream_.good())
             return ReadEof();
@@ -195,34 +187,34 @@ namespace parse
     }
 
 
-    std::optional<Token> Lexer::ReadNumber()
+    optional<Token> Lexer::ReadNumber()
     {
-        if (!std::isdigit(token_stream_.peek()))
-            return std::nullopt;
+        if (!isdigit(token_stream_.peek()))
+            return nullopt;
 
-        std::string parsed_num;
-        while (std::isdigit(token_stream_.peek()))
+        string parsed_num;
+        while (isdigit(token_stream_.peek()))
             parsed_num += static_cast<char>(token_stream_.get());
 
-        return token_type::Number{ std::stoi(parsed_num) };
+        return token_type::Number{ stoi(parsed_num) };
     }
 
 
-    std::optional<Token> Lexer::ReadString()
+    optional<Token> Lexer::ReadString()
     {
         // Строки начинаются с одинарных или двойных кавычек
         if (!(token_stream_.peek() == '\'') && 
             !(token_stream_.peek() == '\"'))
         {
-            return std::nullopt;
+            return nullopt;
         }
         // Сохраняем тот тип кавычки с которой начиналась строка
         char closing_char = token_stream_.get();
 
-        auto it = std::istreambuf_iterator<char>(token_stream_);
-        auto end = std::istreambuf_iterator<char>();
+        auto it = istreambuf_iterator<char>(token_stream_);
+        auto end = istreambuf_iterator<char>();
 
-        std::string s;
+        string s;
 
         while (true)
         {
@@ -284,12 +276,12 @@ namespace parse
     }
 
 
-    std::optional<Token> Lexer::ReadWord()
+    optional<Token> Lexer::ReadWord()
     {
-        std::string str(LoadLiteral(token_stream_));
+        string str(LoadLiteral(token_stream_));
 
         if (str.empty())
-            return std::nullopt;
+            return nullopt;
         else if (KEYWORDS.count(str))
             return TOKEN_STRING.at(str);
         else
@@ -297,7 +289,7 @@ namespace parse
     }
 
 
-    std::optional<Token> Lexer::ReadNewline()
+    optional<Token> Lexer::ReadNewline()
     {
         if (token_stream_.peek() == '\n' && 
             !current_token_.Is<token_type::Newline>())
@@ -307,12 +299,12 @@ namespace parse
         }
         else
         {
-            return std::nullopt;
+            return nullopt;
         }
     }
 
 
-    std::optional<Token> Lexer::ReadEof()
+    optional<Token> Lexer::ReadEof()
     {
         if (token_stream_.eof())
         {
@@ -338,16 +330,16 @@ namespace parse
             }
         }
         else
-            return std::nullopt;
+            return nullopt;
     }
 
 
-    std::optional<Token> Lexer::ReadOperator()
+    optional<Token> Lexer::ReadOperator()
     {
         if (!SYMBOLS.count(token_stream_.peek()))
-            return std::nullopt;
+            return nullopt;
 
-        std::optional<Token> out_token(std::nullopt);
+        optional<Token> out_token(nullopt);
 
         char c1 = token_stream_.get();
 
@@ -355,7 +347,7 @@ namespace parse
         if (SYMBOLS.count(token_stream_.peek()))
         {
             char c2 = token_stream_.get();
-            std::string str;
+            string str;
             str.push_back(c1);
             str.push_back(c2);
 
@@ -372,12 +364,12 @@ namespace parse
     }
 
 
-    std::optional<Token> Lexer::ReadIndentOrDedent()
+    optional<Token> Lexer::ReadIndentOrDedent()
     {
         if (!IsNewline())
-            return std::nullopt;
+            return nullopt;
 
-        std::optional<Token> out_token(std::nullopt);
+        optional<Token> out_token(nullopt);
 
         // Нужно подсчитать, изменилось ли количество отступов
         unsigned int num_indents = CountIndents();
@@ -424,9 +416,7 @@ namespace parse
 
 
 
-    /*****************************************************
-     *********    Class Lexer: Helper methods   **********
-     ******************************************************/
+    /*********    Class Lexer: Helper methods   **********/
 
     void Lexer::SkipSymbols()
     {
@@ -456,7 +446,7 @@ namespace parse
         }
         if (token_stream_.peek() == '#') // Пропуск комментария
         {
-            token_stream_.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            token_stream_.ignore(numeric_limits<streamsize>::max(), '\n');
             if (!IsNewline())
                 token_stream_.putback('\n');
         }
@@ -472,14 +462,14 @@ namespace parse
                     size_t pos = token_stream_.tellg();
 
                     // 2. Читаем строку из потока
-                    std::string str;
+                    string str;
                     getline(token_stream_, str);
 
                     if (IsEmptyString(str)) // Проверяем, состоит ли строка только из пробелов
                     {
                         is_empty = true;
                     }
-                    else if (str.find('#') != std::string::npos) // Проверяем, состоит ли строка только из пробелов и комментариев
+                    else if (str.find('#') != string::npos) // Проверяем, состоит ли строка только из пробелов и комментариев
                     {
                         // Отсекаем комментарий
                         str.resize(str.find('#'));
@@ -507,20 +497,11 @@ namespace parse
 
             }
         }
-        //if (IsNewline()) // Пропуск лишних отступов
-        //{
-        //    size_t pos = token_stream_.tellg();
-        //    int num_indents = CountIndents();
-
-        //    if (!(num_indents == num_indents_))
-        //        token_stream_.seekg(pos);
-        //}
     }
 
-
-    std::optional<Token> Lexer::CheckBuffer()
+    optional<Token> Lexer::CheckBuffer()
     {
-        std::optional<Token> out_token(std::nullopt);
+        optional<Token> out_token(nullopt);
 
         if (!token_buffer_.empty())
         {
@@ -538,10 +519,10 @@ namespace parse
     }
 
 
-    bool Lexer::IsEmptyString(std::string& str)
+    bool Lexer::IsEmptyString(string& str)
     {
         return str.empty() ||
-            str.find_first_not_of(" \n") == std::string::npos;
+            str.find_first_not_of(" \n") == string::npos;
     }
 
 

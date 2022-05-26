@@ -95,7 +95,7 @@ struct TestMethodBody : Executable {
     Fn body;
 
     explicit TestMethodBody(Fn body)
-        : body(std::move(body)) {
+        : body(move(body)) {
     }
 
     ObjectHolder Execute(Closure& closure, Context& context) override {
@@ -123,7 +123,7 @@ void TestMethodInvocation() {
     base_methods.push_back(
         {"test"s, {"arg1"s, "arg2"s}, make_unique<TestMethodBody>(base_method_1)});
     base_methods.push_back({"test_2"s, {"arg1"s}, make_unique<TestMethodBody>(base_method_2)});
-    Class base_class{"Base"s, std::move(base_methods), nullptr};
+    Class base_class{"Base"s, move(base_methods), nullptr};
     ClassInstance base_inst{base_class};
     base_inst.Fields()["base_field"s] = ObjectHolder::Own(String{"hello"s});
     ASSERT(base_inst.HasMethod("test"s, 2U));
@@ -149,7 +149,7 @@ void TestMethodInvocation() {
     vector<Method> child_methods;
     child_methods.push_back(
         {"test"s, {"arg1_child"s, "arg2_child"s}, make_unique<TestMethodBody>(child_method_1)});
-    Class child_class{"Child"s, std::move(child_methods), &base_class};
+    Class child_class{"Child"s, move(child_methods), &base_class};
     ClassInstance child_inst{child_class};
     ASSERT(child_inst.HasMethod("test"s, 2U));
     base_closure.clear();
@@ -224,7 +224,7 @@ void TestMove() {
         Logger logger;
 
         auto one = ObjectHolder::Share(logger);
-        ObjectHolder two = std::move(one);
+        ObjectHolder two = move(one);
 
         ASSERT_EQUAL(Logger::instance_count, 1);
         ASSERT(two.Get() == &logger);
@@ -234,7 +234,7 @@ void TestMove() {
         auto one = ObjectHolder::Own(Logger());
         ASSERT_EQUAL(Logger::instance_count, 1);
         Object* stored = one.Get();
-        ObjectHolder two = std::move(one);
+        ObjectHolder two = move(one);
         ASSERT_EQUAL(Logger::instance_count, 1);
 
         ASSERT(two.Get() == stored);
@@ -427,10 +427,10 @@ void TestComparison() {
             return lt_result;
         };
 
-        std::vector<Method> cls1_methods;
-        cls1_methods.push_back({"__eq__"s, {"rhs"s}, std::make_unique<TestMethodBody>(eq_body)});
-        cls1_methods.push_back({"__lt__"s, {"rhs"s}, std::make_unique<TestMethodBody>(lt_body)});
-        Class cls1{"Class1"s, std::move(cls1_methods), nullptr};
+        vector<Method> cls1_methods;
+        cls1_methods.push_back({"__eq__"s, {"rhs"s}, make_unique<TestMethodBody>(eq_body)});
+        cls1_methods.push_back({"__lt__"s, {"rhs"s}, make_unique<TestMethodBody>(lt_body)});
+        Class cls1{"Class1"s, move(cls1_methods), nullptr};
         ClassInstance lhs{cls1};
 
         Class cls2{"Class2"s, {}, nullptr};

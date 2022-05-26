@@ -13,8 +13,8 @@ namespace runtime
     **************   Class ObjectHolder   ***************
     ******************************************************/
 
-    ObjectHolder::ObjectHolder(std::shared_ptr<Object> data)
-        : data_(std::move(data))
+    ObjectHolder::ObjectHolder(shared_ptr<Object> data)
+        : data_(move(data))
     {
     }
 
@@ -26,7 +26,7 @@ namespace runtime
     ObjectHolder ObjectHolder::Share(Object& object)
     {
         // Возвращаем невладеющий shared_ptr (его deleter ничего не делает)
-        return ObjectHolder(std::shared_ptr<Object>(&object, [](auto* /*p*/) { /* do nothing */ }));
+        return ObjectHolder(shared_ptr<Object>(&object, [](auto* /*p*/) { /* do nothing */ }));
     }
 
 
@@ -104,7 +104,7 @@ namespace runtime
     }
 
 
-    void ClassInstance::Print(std::ostream& os, Context& context)
+    void ClassInstance::Print(ostream& os, Context& context)
     {
         if (HasMethod("__str__"s, 0))
             Call("__str__"s, {}, context)->Print(os, context);
@@ -113,7 +113,7 @@ namespace runtime
     }
 
 
-    bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) const
+    bool ClassInstance::HasMethod(const string& method, size_t argument_count) const
     {
         return class_.GetMethod(method) != nullptr &&
             (class_.GetMethod(method)->formal_params.size()) == argument_count;
@@ -132,8 +132,8 @@ namespace runtime
     }
 
 
-    ObjectHolder ClassInstance::Call(const std::string& method,
-        const std::vector<ObjectHolder>& actual_args,
+    ObjectHolder ClassInstance::Call(const string& method,
+        const vector<ObjectHolder>& actual_args,
         Context& context)
     {
         if (HasMethod(method, actual_args.size()))
@@ -155,7 +155,7 @@ namespace runtime
         }
         else
         {
-            throw std::runtime_error("ClassInstance::Call: No method with passed parameters"s);
+            throw runtime_error("ClassInstance::Call: No method with passed parameters"s);
         }
     }
 
@@ -165,16 +165,16 @@ namespace runtime
     ******************   Class Class   *******************
     ******************************************************/
 
-    Class::Class(std::string name, std::vector<Method> methods, const Class* parent)
+    Class::Class(string name, vector<Method> methods, const Class* parent)
         : methods_()
         , name_(name)
         , parent_(parent)
     {
         for (Method& method : methods)
-            methods_[method.name] = std::move(method);
+            methods_[method.name] = move(method);
     }
 
-    const Method* Class::GetMethod(const std::string& name) const
+    const Method* Class::GetMethod(const string& name) const
     {
         if (methods_.count(name))
         {
@@ -190,9 +190,9 @@ namespace runtime
         }
     }
 
-    [[nodiscard]] const std::string& Class::GetName() const
+    [[nodiscard]] const string& Class::GetName() const
     {
-        return const_cast<std::string&>(name_);
+        return const_cast<string&>(name_);
     }
 
     void Class::Print(ostream& os, Context& /*context*/)
@@ -202,42 +202,34 @@ namespace runtime
 
 
 
-    /*****************************************************
-    *****************   Class String   *******************
-    ******************************************************/
+    /*****************   Class String   *******************/
 
-    void String::Print(std::ostream& os, [[maybe_unused]] Context& context)
+    void String::Print(ostream& os, [[maybe_unused]] Context& context)
     {
         os << GetValue();
     }
 
 
 
-    /*****************************************************
-    *****************   Class Number   *******************
-    ******************************************************/
+    /*****************   Class Number   *******************/
 
-    void Number::Print(std::ostream& os, [[maybe_unused]] Context& context)
+    void Number::Print(ostream& os, [[maybe_unused]] Context& context)
     {
         os << GetValue();
     }
 
 
 
-    /*****************************************************
-    ******************   Class Bool   ********************
-    ******************************************************/
+    /******************   Class Bool   ********************/
 
-    void Bool::Print(std::ostream& os, [[maybe_unused]] Context& context)
+    void Bool::Print(ostream& os, [[maybe_unused]] Context& context)
     {
         os << (GetValue() ? "True"sv : "False"sv);
     }
 
 
 
-    /*****************************************************
-    *******************   Supp Func   ********************
-    ******************************************************/
+    /*******************   Supp Func   ********************/
 
     bool Equal(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context)
     {
@@ -262,7 +254,7 @@ namespace runtime
             return true;
         }
 
-        throw std::runtime_error("Equal: No implementation of comparing two passed objects"s);
+        throw runtime_error("Equal: No implementation of comparing two passed objects"s);
     }
 
 
@@ -285,7 +277,7 @@ namespace runtime
             return lhs.TryAs<Number>()->GetValue() < rhs.TryAs<Number>()->GetValue();
         }
 
-        throw std::runtime_error("Less: No implementation of comparing two passed objects"s);
+        throw runtime_error("Less: No implementation of comparing two passed objects"s);
     }
 
 
